@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using SignalRChatShared;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -170,6 +171,35 @@ namespace SignalRChatClient
         private async Task EndConnection()
         {
             await _connection.StopAsync();
+        }
+
+        private async Task JoinRoomAsync(string username, string room)
+        {
+            var chatUserInfo = new ChatUserInfo
+            {
+                Username = Name,
+                Room = CurrentRoom
+            };
+
+            try
+            {
+                if (_connection.State == HubConnectionState.Connected)
+                {
+                    await _connection.InvokeAsync("JoinRoom", new ChatUserInfo
+                    {
+                        Username = username,
+                        Room = room
+                    });
+                }
+                else
+                {
+                    MessageBox.Show("Not connected to the server.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to join room: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void RaisePropertyChanged(string propertyName)
